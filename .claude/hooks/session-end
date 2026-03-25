@@ -1,0 +1,11 @@
+#!/bin/bash
+# Session end hook - apply time-based decay on session end
+
+# Only run if memorydecay is available
+if command -v memorydecay &> /dev/null; then
+    # Apply decay
+    memorydecay tick &> /dev/null || true
+fi
+
+# Always exit successfully
+exit 0

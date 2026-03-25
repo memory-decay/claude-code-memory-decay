@@ -1,0 +1,11 @@
+#!/bin/bash
+# PreCompact hook - apply time-based decay before context compression
+
+# Only run if memorydecay is available
+if command -v memorydecay &> /dev/null; then
+    # Apply decay silently - don't pollute context
+    memorydecay tick &> /dev/null || true
+fi
+
+# Always exit successfully - don't block compaction
+exit 0
