@@ -153,8 +153,11 @@ SQLite + Vector DB (~/.memorydecay/memories.db)
 # Search memories
 memorydecay search "API design decisions"
 
-# Store a memory
-memorydecay store "User prefers dark mode" --importance 0.8 --category preference
+# Store with correct category and importance
+memorydecay store "User prefers dark mode" --importance 0.9 --category preference
+memorydecay store "Chose REST over GraphQL due to team familiarity" --importance 0.8 --category decision
+memorydecay store "Auth service returns 401 on expired refresh tokens" --importance 0.8 --category fact
+memorydecay store "Finished implementing login flow" --importance 0.5 --category episode
 
 # Check server status
 memorydecay server status
@@ -166,12 +169,25 @@ memorydecay migrate --from ~/.claude/memory
 memorydecay tick
 ```
 
+## Memory Categories
+
+Not all memories are equal. The skill guides the agent to pick the right category and importance:
+
+| Category | When | Importance | Example |
+|----------|------|------------|---------|
+| `preference` | User's role, style, habits, likes/dislikes | 0.8–1.0 | "User prefers Korean for conversation, English for code" |
+| `decision` | Why X was chosen, tradeoffs, rejected alternatives | 0.8–0.9 | "Chose SQLite over Postgres — single-node, no ops overhead" |
+| `fact` | Technical facts, API behaviors, architecture | 0.7–0.9 | "Auth service returns inconsistent 4xx on token expiry" |
+| `episode` | What was worked on, session context | 0.3–0.6 | "Finished migrating auth middleware" |
+
+The agent stores proactively — it doesn't wait for the user to say "remember this."
+
 ## Agent Memory Workflow
 
-1. **At session start**: Agent reads SKILL.md (automatic by Claude Code)
-2. **During conversation**: Agent stores important facts proactively
+1. **At session start**: Agent reads SKILL.md → searches memories for relevant context
+2. **During conversation**: Agent stores proactively — preferences, decisions, facts, episodes — with calibrated importance
 3. **Before compaction**: Hook applies decay automatically
-4. **On recall**: Agent searches and sees freshness indicators
+4. **On recall**: Agent searches and sees freshness indicators (`fresh` → act confidently, `stale` → verify first)
 
 ## Development
 
