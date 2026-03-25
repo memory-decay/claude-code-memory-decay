@@ -24,6 +24,16 @@ That works. Until it doesn't.
 
 ## Install
 
+### Guided Setup (Recommended)
+
+If you have the repo cloned and Claude Code open, just ask:
+
+```
+setup memorydecay
+```
+
+Claude Code will use the built-in setup skill to walk you through the full installation — cloning dependencies, installing the CLI, copying skills and hooks, and setting environment variables.
+
 ### As a Claude Code Plugin
 
 ```bash
@@ -45,18 +55,28 @@ The plugin automatically installs:
 ### Manual Installation (uv)
 
 ```bash
-# 1. Clone
+# 1. Clone this repo and the core dependency
 git clone https://github.com/memory-decay/claude-code-memory-decay.git
 cd claude-code-memory-decay
 
-# 2. Install with uv
-uv pip install -e .
+git clone https://github.com/memory-decay/memory-decay-core.git ../memory-decay-core
+cd ../memory-decay-core && uv venv && uv pip install -e . && cd -
+
+# 2. Install the CLI
+uv tool install --from . claude-code-memorydecay
 
 # 3. Install skill and hooks
-./install.sh
+mkdir -p ~/.claude/skills ~/.claude/hooks ~/.memorydecay
+cp -r .claude/skills/memorydecay ~/.claude/skills/
+cp .claude/hooks/pre-compact .claude/hooks/session-end ~/.claude/hooks/
+chmod +x ~/.claude/hooks/pre-compact ~/.claude/hooks/session-end
 
-# 4. Set environment variable
-export MEMORYDECAY_CORE_PATH=/path/to/memory-decay-core
+# 4. Set environment variable (add to your shell profile)
+export MEMORYDECAY_CORE_PATH=$(realpath ../memory-decay-core)
+
+# 5. Verify
+memorydecay --version
+memorydecay server status
 ```
 
 ### Prerequisites
