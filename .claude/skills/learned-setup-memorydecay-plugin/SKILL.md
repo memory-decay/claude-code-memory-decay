@@ -34,7 +34,7 @@ Fallback if `uv tool` fails:
 uv venv && uv pip install -e .
 ```
 
-Verify: `memorydecay --version` should print `memorydecay, version 0.2.0`
+Verify: `memorydecay --version` should print `memorydecay, version 0.2.1`
 
 ### Step 3: Install skill and hooks
 
