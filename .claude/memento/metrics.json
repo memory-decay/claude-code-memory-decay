@@ -2,13 +2,19 @@
   "learned-setup-memorydecay-plugin": {
     "scope": "project",
     "created_at": "2026-03-25",
-    "last_used": "2026-03-25",
-    "last_optimized": null,
-    "usage_count": 0,
-    "success_count": 0,
+    "last_used": "2026-03-26",
+    "last_optimized": "2026-03-26",
+    "usage_count": 1,
+    "success_count": 1,
     "failure_count": 0,
-    "utility": null,
-    "optimization_count": 0,
-    "trigger_log": []
+    "utility": 1.0,
+    "optimization_count": 2,
+    "trigger_log": [
+      {
+        "date": "2026-03-26",
+        "outcome": "success",
+        "notes": "Full walkthrough test. Found venv python auto-detection gap in cli.py — fixed with _find_python(). First store timeout documented."
+      }
+    ]
   }
 }

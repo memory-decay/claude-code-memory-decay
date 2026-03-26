@@ -55,7 +55,7 @@ The plugin automatically installs:
 ### Manual Installation (uv)
 
 ```bash
-# 1. Clone this repo and the core dependency
+# 1. Clone this repo and the backend server
 git clone https://github.com/memory-decay/claude-code-memory-decay.git
 cd claude-code-memory-decay
 
@@ -74,9 +74,10 @@ chmod +x ~/.claude/hooks/pre-compact ~/.claude/hooks/session-end
 # 4. Set environment variable (add to your shell profile)
 export MEMORYDECAY_CORE_PATH=$(realpath ../memory-decay-core)
 
-# 5. Verify
-memorydecay --version
-memorydecay server status
+# 5. Start the server and verify connection
+memorydecay server start
+memorydecay server status        # shows PID and current tick
+curl -s http://127.0.0.1:8100/health  # direct health check
 ```
 
 ### Prerequisites
@@ -99,8 +100,11 @@ Add to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.) to make it permanent.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
+| `MEMORYDECAY_PORT` | `8100` | Server port — health endpoint at `http://127.0.0.1:{port}/health` |
 | `MEMORYDECAY_DB_PATH` | `~/.memorydecay/memories.db` | SQLite database location |
-| `MEMORYDECAY_PORT` | `8100` | Server port |
+| `MEMORYDECAY_PYTHON` | auto-detected | Python executable for running the server (auto-detects `{core_path}/.venv/bin/python`) |
+
+The backend server (`memory-decay-core`) runs locally on `127.0.0.1:8100` by default. The CLI auto-starts the server on first use and auto-detects the venv python from the core dependency.
 
 ### Shared Database with OpenClaw
 

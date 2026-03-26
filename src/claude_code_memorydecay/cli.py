@@ -41,12 +41,23 @@ def find_core_path() -> Optional[str]:
     return None
 
 
+def _find_python(core_path: Optional[str]) -> str:
+    """Find the right Python for the server. Prefer the core venv over system python."""
+    if env_python := os.environ.get("MEMORYDECAY_PYTHON"):
+        return env_python
+    if core_path:
+        venv_python = Path(core_path) / ".venv" / "bin" / "python"
+        if venv_python.exists():
+            return str(venv_python)
+    return "python3"
+
+
 def get_server_manager() -> ServerManager:
     """Get configured server manager."""
     port = int(os.environ.get("MEMORYDECAY_PORT", "8100"))
     db_path = os.environ.get("MEMORYDECAY_DB_PATH", "~/.memorydecay/memories.db")
-    python_path = os.environ.get("MEMORYDECAY_PYTHON", "python3")
     core_path = find_core_path()
+    python_path = _find_python(core_path)
     
     return ServerManager(
         port=port,
