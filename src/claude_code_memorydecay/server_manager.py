@@ -21,7 +21,10 @@ class ServerManager:
         core_path: Optional[str] = None,
         python_path: str = "python3",
         db_path: str = "~/.memorydecay/memories.db",
-        embedding_provider: str = "local"
+        embedding_provider: Optional[str] = None,
+        embedding_model: Optional[str] = None,
+        embedding_api_key: Optional[str] = None,
+        embedding_dim: Optional[int] = None,
     ):
         self.pid_dir = Path(pid_dir).expanduser()
         self.pid_file = self.pid_dir / "server.pid"
@@ -29,7 +32,10 @@ class ServerManager:
         self.core_path = core_path
         self.python_path = python_path
         self.db_path = Path(db_path).expanduser()
-        self.embedding_provider = embedding_provider
+        self.embedding_provider = embedding_provider or "local"
+        self.embedding_model = embedding_model
+        self.embedding_api_key = embedding_api_key
+        self.embedding_dim = embedding_dim
         
         # Ensure directory exists
         self.pid_dir.mkdir(parents=True, exist_ok=True)
@@ -89,6 +95,15 @@ class ServerManager:
             "--db-path", str(self.db_path),
             "--embedding-provider", self.embedding_provider,
         ]
+        
+        if self.embedding_model:
+            args.extend(["--embedding-model", self.embedding_model])
+        
+        if self.embedding_api_key:
+            args.extend(["--embedding-api-key", self.embedding_api_key])
+        
+        if self.embedding_dim:
+            args.extend(["--embedding-dim", str(self.embedding_dim)])
         
         # Start server process
         env = os.environ.copy()

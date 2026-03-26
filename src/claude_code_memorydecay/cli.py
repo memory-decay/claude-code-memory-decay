@@ -52,6 +52,24 @@ def _find_python(core_path: Optional[str]) -> str:
     return "python3"
 
 
+def resolve_embedding_config():
+    """Resolve embedding provider, model, and API key from environment.
+    
+    Priority: MD_EMBEDDING_* > provider-specific env vars > defaults
+    """
+    provider = os.environ.get("MD_EMBEDDING_PROVIDER", "local")
+    model = os.environ.get("MD_EMBEDDING_MODEL")
+    api_key = (
+        os.environ.get("MD_EMBEDDING_API_KEY")
+        or (os.environ.get("OPENAI_API_KEY") if provider == "openai" else None)
+        or (os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+            if provider == "gemini" else None)
+    )
+    dim_str = os.environ.get("MD_EMBEDDING_DIM")
+    dim = int(dim_str) if dim_str else None
+    return provider, model, api_key, dim
+
+
 def get_server_manager() -> ServerManager:
     """Get configured server manager."""
     port = int(os.environ.get("MEMORYDECAY_PORT", "8100"))
@@ -59,11 +77,17 @@ def get_server_manager() -> ServerManager:
     core_path = find_core_path()
     python_path = _find_python(core_path)
     
+    provider, model, api_key, dim = resolve_embedding_config()
+    
     return ServerManager(
         port=port,
         core_path=core_path,
         python_path=python_path,
-        db_path=db_path
+        db_path=db_path,
+        embedding_provider=provider,
+        embedding_model=model,
+        embedding_api_key=api_key,
+        embedding_dim=dim,
     )
 
 

@@ -106,6 +106,33 @@ Add to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.) to make it permanent.
 
 The backend server (`memory-decay-core`) runs locally on `127.0.0.1:8100` by default. The CLI auto-starts the server on first use and auto-detects the venv python from the core dependency.
 
+### Embedding Configuration
+
+The default embedding provider is `local` (sentence-transformers), which requires no API key. To use cloud embedding providers instead:
+
+```bash
+# Choose a provider
+export MD_EMBEDDING_PROVIDER=openai   # or: gemini, local
+
+# Set API key (pick one — generic or provider-specific)
+export MD_EMBEDDING_API_KEY=sk-...     # works with any provider
+# OR
+export OPENAI_API_KEY=sk-...          # auto-detected when provider=openai
+export GEMINI_API_KEY=...             # auto-detected when provider=gemini
+
+# Optional: override model or dimension
+export MD_EMBEDDING_MODEL=text-embedding-3-small
+export MD_EMBEDDING_DIM=1536
+```
+
+**Fallback order for API keys:** `MD_EMBEDDING_API_KEY` > provider-specific env var (`OPENAI_API_KEY` / `GEMINI_API_KEY`)
+
+| Provider | Env var | No extra setup needed |
+|----------|---------|----------------------|
+| `local` | — | ✅ Uses sentence-transformers (pip install local extra) |
+| `openai` | `OPENAI_API_KEY` | Requires OpenAI API access |
+| `gemini` | `GEMINI_API_KEY` | Requires Google AI API access |
+
 ### Shared Database with OpenClaw
 
 To share the same database with OpenClaw:
