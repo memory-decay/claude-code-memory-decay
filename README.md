@@ -38,7 +38,7 @@ Claude Code will use the built-in setup skill to walk you through the full insta
 
 ```bash
 /plugin marketplace add memory-decay/claude-code-memory-decay
-/plugin install memorydecay@memory-decay/claude-code-memory-decay
+/plugin install memorydecay@claude-code-memory-decay
 ```
 
 Then set the required environment variable:

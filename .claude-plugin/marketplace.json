@@ -10,7 +10,7 @@
   },
   "plugins": [
     {
-      "name": "memory-decay",
+      "name": "memorydecay",
       "source": "./",
       "description": "Human-like memory with decay for Claude Code",
       "category": "memory",
