@@ -1,6 +1,6 @@
 {
   "name": "memorydecay",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Human-like memory with decay for Claude Code",
   "author": {
     "name": "Claude Code Memory Decay Team",
