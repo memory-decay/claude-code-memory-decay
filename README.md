@@ -93,9 +93,9 @@ The backend server (`memory-decay`) is installed via `pip install memory-decay`.
 |----------|---------|-------------|
 | `MEMORYDECAY_PORT` | `8100` | Server port — health endpoint at `http://127.0.0.1:{port}/health` |
 | `MEMORYDECAY_DB_PATH` | `~/.memorydecay/memories.db` | SQLite database location |
-| `MEMORYDECAY_PYTHON` | auto-detected | Python executable for running the server (auto-detects `{core_path}/.venv/bin/python`) |
+| `MEMORYDECAY_PYTHON` | `python3` | Python executable for running the server |
 
-The backend server (`memory-decay-core`) runs locally on `127.0.0.1:8100` by default. The CLI auto-starts the server on first use and auto-detects the venv python from the core dependency.
+The backend server runs locally on `127.0.0.1:8100` by default. The CLI auto-starts the server on first use.
 
 ### Embedding Configuration
 
