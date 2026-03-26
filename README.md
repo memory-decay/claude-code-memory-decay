@@ -239,6 +239,151 @@ claude plugin validate .
 | Skill | `SKILL.md` | Agent instructions |
 | Hooks | `pre-compact`, `session-end` | Automatic decay triggers |
 
+## For AI Agents: Self-Installation Guide
+
+> This section is written for LLM agents (Claude, GPT, etc.) to follow autonomously. If you're a human, use the [Manual Installation](#manual-installation-uv) section above.
+
+### Quick Install (one-shot)
+
+Run these commands in order. Stop if any step fails and diagnose before continuing.
+
+```bash
+# 1. Install the backend engine (requires Python 3.10+)
+pip install memory-decay
+
+# 2. Verify installation
+pip show memory-decay | head -3
+# Expected: Name: memory-decay, Version: 0.1.x
+
+# 3. Clone this repo
+git clone https://github.com/memory-decay/claude-code-memory-decay.git /tmp/claude-code-memory-decay
+
+# 4. Install the CLI
+cd /tmp/claude-code-memory-decay
+pip install -e .
+
+# 5. Install skills and hooks
+mkdir -p ~/.claude/skills ~/.claude/hooks ~/.memorydecay
+cp -r .claude/skills/memorydecay ~/.claude/skills/
+cp .claude/hooks/pre-compact .claude/hooks/session-end ~/.claude/hooks/
+chmod +x ~/.claude/hooks/pre-compact ~/.claude/hooks/session-end
+
+# 6. Verify CLI works
+memorydecay --version
+# Expected: 0.1.x
+
+# 7. Start the server
+memorydecay server start
+# Expected: Server started (PID: <number>)
+
+# 8. Verify server health
+curl -s http://127.0.0.1:8100/health
+# Expected: {"status":"ok","current_tick":0}
+
+# 9. Quick smoke test — store and search
+memorydecay store "Test memory: sky is blue" --importance 0.5 --category fact
+memorydecay search "sky color"
+# Expected: [FRESH] Test memory: sky is blue
+```
+
+### Diagnosing Issues
+
+**Server won't start:**
+```bash
+# Check if memory-decay package is installed
+pip show memory-decay
+# If missing: pip install memory-decay
+
+# Check if port 8100 is already in use
+lsof -i :8100 2>/dev/null || ss -tlnp | grep 8100
+
+# Try starting with verbose output
+python3 -m memory_decay.server --port 8100 --db-path ~/.memorydecay/memories.db
+```
+
+**`pip show memory-decay` returns nothing:**
+```bash
+# Your Python might be different from the one Claude Code uses
+which python3
+python3 -m pip install memory-decay
+# If that fails, try:
+python3.10 -m pip install memory-decay
+# or
+python3.11 -m pip install memory-decay
+```
+
+**ImportError when starting server:**
+```bash
+# Usually a missing dependency. Reinstall with all deps:
+pip install --force-reinstall memory-decay
+
+# Check what's missing
+python3 -c "from memory_decay.server import create_app; print('OK')"
+```
+
+**`memorydecay` command not found:**
+```bash
+# The CLI wasn't installed. Check:
+pip show claude-code-memorydecay
+# If missing:
+cd /tmp/claude-code-memory-decay && pip install -e .
+
+# Or run directly:
+python3 -m claude_code_memorydecay.cli --help
+```
+
+**Port conflict (something else on 8100):**
+```bash
+# Use a different port
+export MEMORYDECAY_PORT=8101
+memorydecay server start
+memorydecay search "test"
+```
+
+**Embedding errors (local provider needs sentence-transformers):**
+```bash
+# If you see errors about sentence-transformers, either:
+# Option A: Install local embeddings
+pip install sentence-transformers
+
+# Option B: Switch to OpenAI embeddings
+export MD_EMBEDDING_PROVIDER=openai
+export OPENAI_API_KEY=your-key-here
+memorydecay server stop
+memorydecay server start
+```
+
+**Database locked or corrupted:**
+```bash
+# Reset the database (deletes all memories)
+rm -f ~/.memorydecay/memories.db ~/.memorydecay/memories.db-wal ~/.memorydecay/memories.db-shm
+memorydecay server stop
+memorydecay server start
+```
+
+### Key Files to Know
+
+| Path | Purpose |
+|------|---------|
+| `~/.memorydecay/memories.db` | SQLite database (all memories live here) |
+| `~/.claude/skills/memorydecay/SKILL.md` | Agent instructions loaded each session |
+| `~/.claude/hooks/pre-compact` | Runs before context compaction |
+| `~/.claude/hooks/session-end` | Runs when session ends |
+| `~/.memorydecay/server.pid` | PID file for server lifecycle |
+
+### After Install: Verify Everything Works
+
+```bash
+# Full integration check
+memorydecay server status        # Should show running + tick
+memorydecay store "Integration test" --importance 0.9 --category fact
+memorydecay search "integration" # Should return the memory
+memorydecay tick                 # Apply one decay step
+memorydecay server stop          # Clean shutdown
+```
+
+If all commands succeed without errors, the installation is complete. The agent will automatically use memory on the next session.
+
 ## License
 
 MIT
