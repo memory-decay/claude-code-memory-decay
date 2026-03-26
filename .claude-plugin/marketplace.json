@@ -1,0 +1,20 @@
+{
+  "name": "claude-code-memory-decay",
+  "owner": {
+    "name": "Claude Code Memory Decay Team",
+    "email": "noreply@example.com"
+  },
+  "metadata": {
+    "description": "Human-like memory with decay for Claude Code",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "memory-decay",
+      "source": "./",
+      "description": "Human-like memory with decay for Claude Code",
+      "category": "memory",
+      "tags": ["memory", "decay", "persistence"]
+    }
+  ]
+}
