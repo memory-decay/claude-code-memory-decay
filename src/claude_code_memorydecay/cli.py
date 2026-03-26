@@ -13,22 +13,20 @@ from .server_manager import ServerManager
 
 
 def find_core_path() -> Optional[str]:
-    """Auto-detect memory-decay-core path."""
-    # 1. Check environment variable
+    """Auto-detect memory-decay-core path.
+    
+    Priority: MEMORYDECAY_CORE_PATH > pip show > sibling directory
+    """
+    # 1. Check environment variable (for dev/override)
     if env_path := os.environ.get("MEMORYDECAY_CORE_PATH"):
         if Path(env_path).exists():
             return env_path
     
-    # 2. Check sibling directory (same parent as this project)
-    sibling = Path(__file__).parent.parent.parent.parent / "memory-decay-core"
-    if sibling.exists():
-        return str(sibling)
-    
-    # 3. Check if installed as package
+    # 2. Check if installed as pip package
     try:
         import subprocess
         result = subprocess.run(
-            ["pip", "show", "memory-decay-core"],
+            ["pip", "show", "memory-decay"],
             capture_output=True,
             text=True
         )
@@ -37,6 +35,11 @@ def find_core_path() -> Optional[str]:
                 return line.split(":", 1)[1].strip()
     except Exception:
         pass
+    
+    # 3. Check sibling directory (same parent as this project, for dev)
+    sibling = Path(__file__).parent.parent.parent.parent / "memory-decay-core"
+    if sibling.exists():
+        return str(sibling)
     
     return None
 

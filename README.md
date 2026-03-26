@@ -41,10 +41,10 @@ Claude Code will use the built-in setup skill to walk you through the full insta
 /plugin install memorydecay@claude-code-memory-decay
 ```
 
-Then set the required environment variable:
+Then install the backend engine:
 
 ```bash
-export MEMORYDECAY_CORE_PATH=/path/to/memory-decay-core
+pip install memory-decay
 ```
 
 The plugin automatically installs:
@@ -55,24 +55,21 @@ The plugin automatically installs:
 ### Manual Installation (uv)
 
 ```bash
-# 1. Clone this repo and the backend server
+# 1. Clone this repo
 git clone https://github.com/memory-decay/claude-code-memory-decay.git
 cd claude-code-memory-decay
 
-git clone https://github.com/memory-decay/memory-decay-core.git ../memory-decay-core
-cd ../memory-decay-core && uv venv && uv pip install -e . && cd -
+# 2. Install the backend engine
+pip install memory-decay
 
-# 2. Install the CLI
+# 3. Install the CLI
 uv tool install --from . claude-code-memorydecay
 
-# 3. Install skill and hooks
+# 4. Install skill and hooks
 mkdir -p ~/.claude/skills ~/.claude/hooks ~/.memorydecay
 cp -r .claude/skills/memorydecay ~/.claude/skills/
 cp .claude/hooks/pre-compact .claude/hooks/session-end ~/.claude/hooks/
 chmod +x ~/.claude/hooks/pre-compact ~/.claude/hooks/session-end
-
-# 4. Set environment variable (add to your shell profile)
-export MEMORYDECAY_CORE_PATH=$(realpath ../memory-decay-core)
 
 # 5. Start the server and verify connection
 memorydecay server start
@@ -83,18 +80,12 @@ curl -s http://127.0.0.1:8100/health  # direct health check
 ### Prerequisites
 
 - [uv](https://github.com/astral-sh/uv) or Python 3.10+
-- [memory-decay-core](https://github.com/memory-decay/memory-decay-core) cloned locally
+- `memory-decay` Python package (`pip install memory-decay`)
 - Claude Code CLI
 
 ## Configuration
 
-### Required Environment Variable
-
-```bash
-export MEMORYDECAY_CORE_PATH=/path/to/memory-decay-core
-```
-
-Add to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.) to make it permanent.
+The backend server (`memory-decay`) is installed via `pip install memory-decay`. The CLI auto-detects the installation path using `pip show memory-decay`.
 
 ### Optional Environment Variables
 
