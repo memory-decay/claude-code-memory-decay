@@ -13,14 +13,12 @@ At the start of each session, the memory system is automatically available. No a
 
 ## Commands
 
-Use these commands to interact with your memory:
-
 ```bash
 # Search for relevant memories
 memorydecay search "your query here" [--top-k 5]
 
-# Store an important memory
-memorydecay store "memory content" [--importance 0.8] [--category fact]
+# Store a memory (see Category Guide below for correct flags)
+memorydecay store "memory content" --importance 0.8 --category decision --mtype fact
 
 # Apply time-based decay (called automatically by hooks)
 memorydecay tick
@@ -32,16 +30,31 @@ memorydecay server status
 memorydecay migrate [--from ~/.claude/memory]
 ```
 
-## When to Store Memories
+## Category Guide — ALWAYS match the right category
 
-Proactively store information that will be useful later:
+Every memory MUST use the correct `--category` flag. Do NOT default everything to `fact`.
 
-- **Facts** (importance: 0.8): API decisions, architectural patterns, domain knowledge
-- **Preferences** (importance: 0.8): User likes/dislikes, style preferences, settings
-- **Decisions** (importance: 0.8): Why something was done a certain way, tradeoffs considered
-- **Episodes** (importance: 0.5): What was worked on, context for future reference
+| Category | `--category` | `--mtype` | Importance | When to use |
+|----------|-------------|-----------|------------|-------------|
+| **preference** | `preference` | `fact` | 0.8-1.0 | User's likes/dislikes, communication style, workflow habits, tool preferences |
+| **decision** | `decision` | `fact` | 0.7-0.9 | Why something was done a certain way, tradeoffs, rejected alternatives |
+| **fact** | `fact` | `fact` | 0.6-0.9 | Technical facts, API behaviors, architecture patterns, domain knowledge |
+| **episode** | `episode` | `episode` | 0.3-0.6 | What was worked on, session summaries, transient context |
 
-Store BEFORE context gets too long - don't wait until compaction.
+### Importance calibration
+
+Importance directly controls how fast a memory decays. **Use the full range — not everything is 0.8.**
+
+| Importance | Decay behavior | Examples |
+|-----------|----------------|----------|
+| **0.9-1.0** | Persists for hundreds of ticks | User's core identity/role, critical production constraints, "never do X" rules |
+| **0.7-0.8** | Persists for ~100 ticks | Architectural decisions, API conventions, project-level patterns |
+| **0.5-0.6** | Moderate lifespan | What was built this week, intermediate findings, session context |
+| **0.3-0.4** | Fades quickly | Minor observations, temporary workarounds, one-off events |
+
+**Rule of thumb:** If you'd want to recall this in 2 weeks, use 0.8+. If it's only relevant for a few sessions, use 0.5. If it's truly transient, use 0.3.
+
+Store BEFORE context gets too long — don't wait until compaction.
 
 ## When to Search Memories
 
@@ -76,17 +89,28 @@ memorydecay migrate --from ~/.claude/memory
 
 This imports them with appropriate importance levels based on file type.
 
+## Proactive Storing Triggers
+
+Do NOT wait to be asked. Store a memory when ANY of these happen:
+
+- **User context** (preference, 0.8-1.0): User reveals role, expertise, preferences, corrects your approach, or communication style becomes clear
+- **Decisions** (decision, 0.7-0.9): A technical choice is made with tradeoffs, an alternative is rejected with reasoning, a convention is established
+- **Facts** (fact, 0.6-0.9): Non-obvious API behavior discovered, architecture details discussed, bug root cause identified
+- **Episodes** (episode, 0.3-0.6): Feature/fix completed, debugging session concluded, session ends with meaningful work
+
+**If you think "this would be useful to know next time" — store it NOW with the right category and importance.**
+
 ## Best Practices
 
 1. **Search first, then decide**: Always check if relevant context exists
-2. **Store proactively**: Don't wait to be asked - if something seems worth remembering, store it
-3. **Be specific**: Clear, concise memories are more retrievable
-4. **Respect freshness**: Stale memories might be outdated - verify before relying on them
-5. **Use categories**: Helps with future retrieval and organization
+2. **Store proactively**: Don't wait to be asked — if something seems worth remembering, store it
+3. **Calibrate importance honestly**: Use the full 0.3-1.0 range. Not everything is 0.8.
+4. **Pick the right category**: Preference ≠ fact ≠ episode. Category affects decay rate.
+5. **Respect freshness**: Stale memories might be outdated — verify before relying on them
 
 ## Troubleshooting
 
 If `memorydecay` commands fail:
 1. Check server status: `memorydecay server status`
 2. Start manually if needed: `memorydecay server start`
-3. Verify memory-decay-core is available at `MEMORYDECAY_CORE_PATH`
+3. Check memory-decay is installed: `pip show memory-decay`
