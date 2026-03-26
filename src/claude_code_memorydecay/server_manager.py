@@ -108,24 +108,43 @@ class ServerManager:
         # Start server process
         env = os.environ.copy()
         env["PYTHONPATH"] = f"{self.core_path}/src"
-        
+
+        self.log_file = self.pid_dir / "server.log"
+        log_fh = open(self.log_file, "a")
+
         process = subprocess.Popen(
             args,
             cwd=self.core_path,
             env=env,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            stdout=log_fh,
+            stderr=log_fh,
             start_new_session=True  # Detach from parent
         )
-        
+
+        log_fh.close()  # Parent doesn't need the fd; child inherited it
+
         # Write PID file
         self.pid_file.write_text(str(process.pid))
-        
+
         # Wait for server to be healthy
         if not self.wait_for_health():
-            # Clean up if failed
+            # Read last lines of log for error context
+            error_context = ""
+            try:
+                log_content = self.log_file.read_text()
+                lines = log_content.strip().splitlines()
+                last_lines = lines[-20:] if len(lines) > 20 else lines
+                error_context = "\n".join(last_lines)
+            except Exception:
+                pass
+
             self.stop()
-            raise Exception("Server failed to start within timeout")
+            msg = "Server failed to start within timeout."
+            if error_context:
+                msg += f"\n\nServer log ({self.log_file}):\n{error_context}"
+            else:
+                msg += f"\nCheck {self.log_file} for details."
+            raise Exception(msg)
         
         return True
     
